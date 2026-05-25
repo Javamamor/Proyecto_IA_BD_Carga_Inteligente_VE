@@ -1,0 +1,1408 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EV Optimizer · Grupo 8IA</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --card: #22263a;
+            --border: #2e3350;
+            --accent: #4f8ef7;
+            --accent2: #7c3aed;
+            --bajo: #22c55e;
+            --medio: #f59e0b;
+            --alto: #ef4444;
+            --text: #e2e8f0;
+            --muted: #64748b;
+            --white: #fff;
+            --radius: 12px;
+            --radius-sm: 8px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-height: 100vh;
+        }
+
+        /* ── AUTH ── */
+        #auth-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: radial-gradient(ellipse at 60% 30%, #1a237e22, transparent 60%),
+                radial-gradient(ellipse at 20% 80%, #7c3aed18, transparent 50%);
+        }
+
+        .auth-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 40px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: 0 25px 60px #0008;
+        }
+
+        .auth-logo {
+            text-align: center;
+            margin-bottom: 28px;
+        }
+
+        .auth-logo .icon {
+            font-size: 2.8rem;
+        }
+
+        .auth-logo h1 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            margin-top: 8px;
+        }
+
+        .auth-logo p {
+            color: var(--muted);
+            font-size: .85rem;
+            margin-top: 4px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--card);
+            border-radius: var(--radius-sm);
+            padding: 4px;
+            margin-bottom: 24px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 9px;
+            border: none;
+            background: none;
+            color: var(--muted);
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: .9rem;
+            font-weight: 500;
+            transition: all .2s;
+        }
+
+        .auth-tab.active {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: .82rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            background: var(--card);
+            border: 1px solid var(--border);
+            color: var(--text);
+            padding: 11px 14px;
+            border-radius: var(--radius-sm);
+            font-size: .9rem;
+            outline: none;
+            transition: border-color .2s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            border-color: var(--accent);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border: none;
+            border-radius: var(--radius-sm);
+            color: #fff;
+            font-size: .95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity .2s, transform .1s;
+        }
+
+        .btn-primary:hover {
+            opacity: .9;
+        }
+
+        .btn-primary:active {
+            transform: scale(.98);
+        }
+
+        .msg {
+            padding: 10px 14px;
+            border-radius: var(--radius-sm);
+            font-size: .85rem;
+            margin-bottom: 14px;
+            display: none;
+        }
+
+        .msg.error {
+            background: #ef444420;
+            border: 1px solid #ef444450;
+            color: #fca5a5;
+        }
+
+        .msg.success {
+            background: #22c55e20;
+            border: 1px solid #22c55e50;
+            color: #86efac;
+        }
+
+        /* ── APP ── */
+        #app-screen {
+            display: none;
+        }
+
+        .topbar {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .topbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .topbar-logo {
+            font-size: 1.3rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .topbar-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .user-badge {
+            background: var(--card);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: .85rem;
+        }
+
+        .btn-logout {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--muted);
+            padding: 6px 14px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: .85rem;
+            transition: all .2s;
+        }
+
+        .btn-logout:hover {
+            border-color: var(--alto);
+            color: var(--alto);
+        }
+
+        .nav-tabs {
+            background: var(--surface);
+            border-bottom: 1px solid var(--border);
+            padding: 0 24px;
+            display: flex;
+            gap: 4px;
+        }
+
+        .nav-tab {
+            padding: 14px 20px;
+            background: none;
+            border: none;
+            color: var(--muted);
+            cursor: pointer;
+            font-size: .9rem;
+            font-weight: 500;
+            border-bottom: 2px solid transparent;
+            transition: all .2s;
+        }
+
+        .nav-tab.active {
+            color: var(--accent);
+            border-bottom-color: var(--accent);
+        }
+
+        .main-content {
+            padding: 28px 24px;
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        /* ── CARDS ── */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: .75rem;
+            font-weight: 600;
+        }
+
+        .badge-bajo {
+            background: #22c55e20;
+            color: var(--bajo);
+        }
+
+        .badge-medio {
+            background: #f59e0b20;
+            color: var(--medio);
+        }
+
+        .badge-alto {
+            background: #ef444420;
+            color: var(--alto);
+        }
+
+        /* ── STATS ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-val {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .stat-label {
+            font-size: .8rem;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        /* ── PRECIO GRID ── */
+        .price-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+        }
+
+        @media(max-width:700px) {
+            .price-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+
+        .price-cell {
+            border-radius: 8px;
+            padding: 10px 6px;
+            text-align: center;
+            cursor: default;
+            border: 1px solid transparent;
+            transition: transform .15s;
+        }
+
+        .price-cell:hover {
+            transform: scale(1.05);
+        }
+
+        .price-cell.bajo {
+            background: #22c55e15;
+            border-color: #22c55e30;
+        }
+
+        .price-cell.medio {
+            background: #f59e0b15;
+            border-color: #f59e0b30;
+        }
+
+        .price-cell.alto {
+            background: #ef444415;
+            border-color: #ef444430;
+        }
+
+        .price-cell .ph {
+            font-size: .72rem;
+            color: var(--muted);
+        }
+
+        .price-cell .pv {
+            font-size: .9rem;
+            font-weight: 600;
+            margin: 2px 0;
+        }
+
+        .price-cell .pc {
+            font-size: .65rem;
+        }
+
+        .pc.bajo {
+            color: var(--bajo);
+        }
+
+        .pc.medio {
+            color: var(--medio);
+        }
+
+        .pc.alto {
+            color: var(--alto);
+        }
+
+        /* ── PLAN FORM ── */
+        .plan-form-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+        }
+
+        @media(max-width:600px) {
+            .plan-form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .range-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: .82rem;
+            color: var(--muted);
+            margin-bottom: 6px;
+        }
+
+        .range-group label span {
+            color: var(--text);
+            font-weight: 600;
+        }
+
+        .range-group input[type=range] {
+            width: 100%;
+            accent-color: var(--accent);
+        }
+
+        .priority-btns {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .prio-btn {
+            flex: 1;
+            padding: 9px 6px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--card);
+            color: var(--muted);
+            cursor: pointer;
+            font-size: .82rem;
+            font-weight: 500;
+            text-align: center;
+            transition: all .2s;
+        }
+
+        .prio-btn.active-bajo {
+            border-color: var(--bajo);
+            background: #22c55e18;
+            color: var(--bajo);
+        }
+
+        .prio-btn.active-medio {
+            border-color: var(--medio);
+            background: #f59e0b18;
+            color: var(--medio);
+        }
+
+        .prio-btn.active-alto {
+            border-color: var(--alto);
+            background: #ef444418;
+            color: var(--alto);
+        }
+
+        /* ── PLAN RESULT ── */
+        .plan-result {
+            display: none;
+        }
+
+        .plan-bars {
+            display: flex;
+            align-items: flex-end;
+            gap: 3px;
+            height: 80px;
+            margin-bottom: 4px;
+        }
+
+        .plan-bar {
+            flex: 1;
+            border-radius: 4px 4px 0 0;
+            min-height: 4px;
+            position: relative;
+            cursor: default;
+            transition: opacity .2s;
+        }
+
+        .plan-bar.on {
+            opacity: 1;
+        }
+
+        .plan-bar.off {
+            opacity: .2;
+        }
+
+        .plan-labels {
+            display: flex;
+            gap: 3px;
+        }
+
+        .plan-label {
+            flex: 1;
+            text-align: center;
+            font-size: .6rem;
+            color: var(--muted);
+        }
+
+        .plan-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        .ps-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px;
+            text-align: center;
+        }
+
+        .ps-item .psv {
+            font-size: 1.3rem;
+            font-weight: 700;
+        }
+
+        .ps-item .psl {
+            font-size: .75rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .plan-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .btn-sec {
+            flex: 1;
+            padding: 11px;
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--border);
+            background: none;
+            color: var(--text);
+            cursor: pointer;
+            font-size: .9rem;
+            font-weight: 500;
+            transition: all .2s;
+        }
+
+        .btn-sec:hover {
+            background: var(--surface);
+        }
+
+        .btn-save {
+            flex: 1;
+            padding: 11px;
+            border-radius: var(--radius-sm);
+            border: none;
+            background: linear-gradient(135deg, var(--bajo), #16a34a);
+            color: #fff;
+            cursor: pointer;
+            font-size: .9rem;
+            font-weight: 600;
+            transition: opacity .2s;
+        }
+
+        .btn-save:hover {
+            opacity: .88;
+        }
+
+        /* ── HISTORIAL ── */
+        .history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .hist-item {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .hist-date {
+            font-size: .85rem;
+            color: var(--muted);
+            min-width: 80px;
+        }
+
+        .hist-info {
+            flex: 1;
+        }
+
+        .hist-info .hi-title {
+            font-weight: 600;
+            font-size: .9rem;
+        }
+
+        .hist-info .hi-sub {
+            font-size: .78rem;
+            color: var(--muted);
+            margin-top: 2px;
+        }
+
+        .hist-status {
+            font-size: .75rem;
+        }
+
+        .btn-recalc {
+            padding: 7px 14px;
+            border-radius: 6px;
+            border: 1px solid var(--accent);
+            background: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: .8rem;
+            font-weight: 500;
+            transition: all .2s;
+        }
+
+        .btn-recalc:hover {
+            background: var(--accent);
+            color: #fff;
+        }
+
+        .btn-desactivar {
+            padding: 7px 14px;
+            border-radius: 6px;
+            border: 1px solid #f59e0b50;
+            background: none;
+            color: var(--medio);
+            cursor: pointer;
+            font-size: .8rem;
+            font-weight: 500;
+            transition: all .2s;
+        }
+
+        .btn-desactivar:hover:not(:disabled) {
+            background: var(--medio);
+            color: #000;
+        }
+
+        .btn-del:hover {
+            background: var(--alto);
+            color: #fff;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 24px;
+            color: var(--muted);
+        }
+
+        .empty-state .ei {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 2px solid #fff4;
+            border-top-color: #fff;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            vertical-align: middle;
+            margin-right: 6px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 14px 20px;
+            font-size: .88rem;
+            z-index: 999;
+            transform: translateY(80px);
+            opacity: 0;
+            transition: all .3s;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 18px;
+        }
+
+        .section-header h2 {
+            font-size: 1.05rem;
+            font-weight: 600;
+        }
+
+        .tag-date {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 5px 14px;
+            font-size: .8rem;
+            color: var(--muted);
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ══ AUTH SCREEN ══ -->
+    <div id="auth-screen">
+        <div class="auth-box">
+            <div class="auth-logo">
+                <div class="icon">⚡</div>
+                <h1>EV Optimizer</h1>
+                <p>Grupo 8IA · IES Abastos 2025/26</p>
+            </div>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="switchTab('login')">Iniciar sesión</button>
+                <button class="auth-tab" onclick="switchTab('register')">Registrarse</button>
+            </div>
+            <div class="msg" id="auth-msg"></div>
+
+            <!-- LOGIN -->
+            <div id="form-login">
+                <div class="form-group"><label>Email</label><input type="email" id="login-email"
+                        placeholder="tu@email.com" /></div>
+                <div class="form-group"><label>Contraseña</label><input type="password" id="login-pass"
+                        placeholder="••••••••" /></div>
+                <button class="btn-primary" onclick="doLogin()">Entrar</button>
+            </div>
+
+            <!-- REGISTER -->
+            <div id="form-register" style="display:none">
+                <div class="form-row">
+                    <div class="form-group"><label>Nombre</label><input type="text" id="reg-nombre"
+                            placeholder="Ana García" /></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="reg-email"
+                            placeholder="tu@email.com" /></div>
+                </div>
+                <div class="form-group"><label>Contraseña</label><input type="password" id="reg-pass"
+                        placeholder="••••••••" /></div>
+                <div class="form-group"><label>Modelo del vehículo</label><input type="text" id="reg-modelo"
+                        placeholder="Renault Zoe, Tesla Model 3..." /></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Capacidad batería (kWh)</label><input type="number" id="reg-cap"
+                            placeholder="52" min="10" max="200" /></div>
+                    <div class="form-group"><label>Potencia cargador (kW)</label><input type="number" id="reg-pot"
+                            placeholder="7.4" min="1" max="22" step="0.1" /></div>
+                </div>
+                <button class="btn-primary" onclick="doRegister()">Crear cuenta</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ══ APP SCREEN ══ -->
+    <div id="app-screen">
+        <div class="topbar">
+            <div class="topbar-left">
+                <span style="font-size:1.5rem">⚡</span>
+                <span class="topbar-logo">EV Optimizer</span>
+            </div>
+            <div class="topbar-right">
+                <span class="user-badge">👤 <span id="user-name-badge">Usuario</span></span>
+                <button class="btn-logout" onclick="doLogout()">Salir</button>
+            </div>
+        </div>
+
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="goPage('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="goPage('nuevo-plan')">🔋 Nuevo plan</button>
+            <button class="nav-tab" onclick="goPage('historial')">📋 Mis planes</button>
+        </div>
+
+        <div class="main-content">
+
+            <!-- ── DASHBOARD ── -->
+            <div class="page active" id="page-dashboard">
+                <div class="section-header">
+                    <h2>Precios del día</h2>
+                    <span class="tag-date" id="today-date"></span>
+                </div>
+                <div class="stats-grid" id="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-val" style="color:var(--bajo)" id="s-min">—</div>
+                        <div class="stat-label">Mínimo €/kWh</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" style="color:var(--medio)" id="s-avg">—</div>
+                        <div class="stat-label">Medio €/kWh</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" style="color:var(--alto)" id="s-max">—</div>
+                        <div class="stat-label">Máximo €/kWh</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-val" style="color:var(--bajo)" id="s-bajo">—</div>
+                        <div class="stat-label">Horas baratas 🟢</div>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-title">⏱ Precios por hora — PVPC</div>
+                    <div class="price-grid" id="price-grid">
+                        <div class="stat-label" style="padding:20px;grid-column:1/-1">Cargando precios...</div>
+                    </div>
+                </div>
+                <div class="card" style="margin-top:0">
+                    <div class="card-title">💡 Leyenda</div>
+                    <div style="display:flex;gap:16px;flex-wrap:wrap">
+                        <span><span class="badge badge-bajo">BAJO</span> &lt; 0.083 €/kWh — Ideal para cargar</span>
+                        <span><span class="badge badge-medio">MEDIO</span> 0.083–0.172 €/kWh — Aceptable</span>
+                        <span><span class="badge badge-alto">ALTO</span> &gt; 0.172 €/kWh — Evitar si es posible</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── NUEVO PLAN ── -->
+            <div class="page" id="page-nuevo-plan">
+                <div class="section-header">
+                    <h2>Generar plan de carga</h2>
+                </div>
+                <div class="card">
+                    <div class="card-title">🔋 Parámetros de carga</div>
+                    <div class="plan-form-grid">
+                        <div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Batería actual (%)</label>
+                                    <input type="number" id="soc-actual" value="20" min="0" max="100"
+                                        placeholder="0 – 100" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Batería objetivo (%)</label>
+                                    <input type="number" id="soc-obj" value="80" min="0" max="100"
+                                        placeholder="0 – 100" />
+                                </div>
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label>Capacidad batería (kWh)</label>
+                                    <input type="number" id="bat-cap" value="52" min="10" max="200" step="0.1"
+                                        placeholder="ej. 52" />
+                                </div>
+                                <div class="form-group">
+                                    <label>Potencia cargador (kW)</label>
+                                    <input type="number" id="pot-kw" value="7.4" min="1" max="22" step="0.1"
+                                        placeholder="ej. 7.4" />
+                                </div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="form-group">
+                                <label>Fecha del plan</label>
+                                <input type="date" id="plan-fecha" />
+                            </div>
+                            <div class="form-group">
+                                <label>Tipo de precios</label>
+                                <select id="plan-tipo">
+                                    <option value="actuales">Precios de hoy</option>
+                                    <option value="futuros">Precios de mañana</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Prioridad de clasificación</label>
+                                <div class="priority-btns">
+                                    <button class="prio-btn active-bajo" id="prio-B" onclick="togglePrio('B')">🟢
+                                        Bajo</button>
+                                    <button class="prio-btn active-medio" id="prio-M" onclick="togglePrio('M')">🟡
+                                        Medio</button>
+                                    <button class="prio-btn" id="prio-A" onclick="togglePrio('A')">🔴 Alto</button>
+                                </div>
+                                <p style="font-size:.75rem;color:var(--muted);margin-top:8px">Selecciona las franjas que
+                                    el plan puede usar. Alto requiere confirmación.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="btn-generar" onclick="generarPlan()" style="margin-top:8px">⚡
+                        Generar plan óptimo</button>
+                </div>
+
+                <div class="card plan-result" id="plan-result">
+                    <div class="card-title">📅 Plan generado</div>
+                    <div class="plan-bars" id="plan-bars"></div>
+                    <div class="plan-labels" id="plan-labels"></div>
+                    <div class="plan-summary" id="plan-summary"></div>
+                    <div id="plan-aviso"
+                        style="display:none;margin-top:12px;padding:12px;background:#ef444418;border:1px solid #ef444430;border-radius:8px;font-size:.85rem;color:#fca5a5">
+                    </div>
+                    <div class="plan-actions">
+                        <button class="btn-sec" onclick="generarPlan()">🔄 Regenerar</button>
+                        <button class="btn-save" onclick="guardarPlan()">💾 Guardar plan</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── HISTORIAL ── -->
+            <div class="page" id="page-historial">
+                <div class="section-header">
+                    <h2>Mis planes de carga</h2>
+                    <button class="btn-primary" style="width:auto;padding:8px 18px;font-size:.85rem"
+                        onclick="cargarHistorial()">🔄 Actualizar</button>
+                </div>
+                <div id="historial-list"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ══════════════════════════════════════════
+        // CONFIG
+        // ══════════════════════════════════════════
+        // Con Docker+nginx el frontend llama a /api y nginx hace el proxy al backend
+        // En desarrollo local cambia esto a 'http://localhost:8000'
+        const API = window.location.hostname === 'localhost' && window.location.port === '5500'
+            ? 'http://localhost:8000'   // dev directo
+            : '/api';                   // producción docker
+        let currentUser = null;
+        let currentPlan = null;
+        let prioridades = new Set(['B', 'M']);
+
+        // ══════════════════════════════════════════
+        // UTILS
+        // ══════════════════════════════════════════
+        function showToast(msg, ok = true) {
+            const t = document.getElementById('toast');
+            t.textContent = (ok ? '✅ ' : '❌ ') + msg;
+            t.style.borderColor = ok ? '#22c55e50' : '#ef444450';
+            t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 3000);
+        }
+        function showMsg(id, msg, type) {
+            const el = document.getElementById(id);
+            el.textContent = msg; el.className = 'msg ' + type; el.style.display = 'block';
+        }
+        function hideMsg(id) { document.getElementById(id).style.display = 'none'; }
+        function setLoading(btnId, state) {
+            const b = document.getElementById(btnId);
+            if (state) { b.disabled = true; b.innerHTML = '<span class="loading"></span>Procesando...'; }
+            else { b.disabled = false; }
+        }
+
+        // ══════════════════════════════════════════
+        // AUTH
+        // ══════════════════════════════════════════
+        function switchTab(tab) {
+            document.getElementById('form-login').style.display = tab === 'login' ? '' : 'none';
+            document.getElementById('form-register').style.display = tab === 'register' ? '' : 'none';
+            document.querySelectorAll('.auth-tab').forEach((t, i) => t.classList.toggle('active', (i === 0 && tab === 'login') || (i === 1 && tab === 'register')));
+            hideMsg('auth-msg');
+        }
+
+        async function safeJson(r) {
+            const text = await r.text();
+            try { return JSON.parse(text); }
+            catch (_) {
+                // El servidor devolvió HTML en lugar de JSON (502, 404, etc.)
+                const code = r.status;
+                if (code === 502 || code === 503) throw new Error('El servidor no está disponible (502). Comprueba que el backend está en marcha.');
+                if (code === 404) throw new Error('Endpoint no encontrado (404).');
+                throw new Error(`Error del servidor (${code}). Inténtalo de nuevo.`);
+            }
+        }
+
+        async function doLogin() {
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-pass').value;
+            if (!email || !pass) { showMsg('auth-msg', 'Completa todos los campos', 'error'); return; }
+            try {
+                const r = await fetch(`${API}/auth/login`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, password: pass }) });
+                const d = await safeJson(r);
+                if (!r.ok) throw new Error(d.detail || 'Credenciales incorrectas');
+                currentUser = d.usuario;
+                launchApp();
+            } catch (e) { showMsg('auth-msg', e.message, 'error'); }
+        }
+
+        async function doRegister() {
+            const nombre = document.getElementById('reg-nombre').value.trim();
+            const email = document.getElementById('reg-email').value.trim();
+            const pass = document.getElementById('reg-pass').value;
+            const modelo = document.getElementById('reg-modelo').value.trim();
+            const cap = parseFloat(document.getElementById('reg-cap').value);
+            const pot = parseFloat(document.getElementById('reg-pot').value);
+            if (!nombre || !email || !pass || !modelo || !cap || !pot) { showMsg('auth-msg', 'Completa todos los campos', 'error'); return; }
+            try {
+                const r = await fetch(`${API}/auth/register`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({
+                        nombre, email, password: pass,
+                        vehiculo: { modelo, capacidad_bateria_kwh: cap, potencia_max_carga_kw: pot },
+                        preferencias: { bateria_minima_pct: 20, bateria_objetivo_pct: 90, hora_limite_salida: '08:00', clasificaciones_permitidas: ['bajo', 'medio'], modo_emergencia: false }
+                    })
+                });
+                const d = await safeJson(r);
+                if (!r.ok) throw new Error(d.detail || 'Error al registrar');
+                showMsg('auth-msg', '¡Cuenta creada! Ahora inicia sesión.', 'success');
+                setTimeout(() => switchTab('login'), 1500);
+            } catch (e) { showMsg('auth-msg', e.message, 'error'); }
+        }
+
+        function doLogout() {
+            currentUser = null; currentPlan = null;
+            document.getElementById('app-screen').style.display = 'none';
+            document.getElementById('auth-screen').style.display = 'flex';
+        }
+
+        // ══════════════════════════════════════════
+        // APP LAUNCH
+        // ══════════════════════════════════════════
+        function launchApp() {
+            document.getElementById('auth-screen').style.display = 'none';
+            document.getElementById('app-screen').style.display = 'block';
+            document.getElementById('user-name-badge').textContent = currentUser.nombre.split(' ')[0];
+            // Autorellenar parámetros del vehículo del usuario
+            if (currentUser.vehiculo) {
+                const v = currentUser.vehiculo;
+                if (v.capacidad_bateria_kwh) document.getElementById('bat-cap').value = v.capacidad_bateria_kwh;
+                if (v.potencia_max_carga_kw) document.getElementById('pot-kw').value = v.potencia_max_carga_kw;
+            }
+            // Fecha hoy
+            const hoyLocal = new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Madrid'});
+            document.getElementById('plan-fecha').value = hoyLocal;
+            document.getElementById('today-date').textContent = new Date().toLocaleDateString('es-ES',{weekday:'long',day:'numeric',month:'long', timeZone:'Europe/Madrid'});
+            cargarPrecios();
+        }
+
+        // ══════════════════════════════════════════
+        // NAVEGACIÓN
+        // ══════════════════════════════════════════
+        function goPage(p) {
+            document.querySelectorAll('.page').forEach(el => el.classList.remove('active'));
+            document.querySelectorAll('.nav-tab').forEach(el => el.classList.remove('active'));
+            document.getElementById('page-' + p).classList.add('active');
+            event.target.classList.add('active');
+            if (p === 'historial') cargarHistorial();
+        }
+
+        // ══════════════════════════════════════════
+        // DASHBOARD — PRECIOS
+        // ══════════════════════════════════════════
+        async function cargarPrecios() {
+            // Generar datos demo PVPC realistas si el backend no está disponible
+             const hoy = new Date().toLocaleDateString('sv-SE', {timeZone: 'Europe/Madrid'});
+            let horas = generarPreciosDemo();
+            try {
+                const r = await fetch(`${API}/precios_electricidad?fecha=${hoy}&tipo=actuales`);
+                if (r.ok) { const d = await r.json(); if (d.horas && d.horas.length === 24) horas = d.horas; }
+            } catch (_) { }
+            renderPrecios(horas);
+        }
+
+        function generarPreciosDemo() {
+            // Perfil realista PVPC España (€/kWh)
+            const base = [0.04, 0.038, 0.035, 0.033, 0.034, 0.036, 0.042, 0.195, 0.22, 0.21, 0.19, 0.18, 0.095, 0.098, 0.099, 0.097, 0.1, 0.24, 0.248, 0.252, 0.245, 0.25, 0.245, 0.068];
+            return base.map((p, i) => ({
+                hora: i, precio_kwh: +(p + (Math.random() - .5) * .01).toFixed(4),
+                precio_mwh: +((p + (Math.random() - .5) * .01) * 1000).toFixed(2),
+                clasificacion: p < 0.083 ? 'BAJO' : p < 0.172 ? 'MEDIO' : 'ALTO',
+                datetime: `${new Date().toISOString().split('T')[0]}T${String(i).padStart(2, '0')}:00:00`
+            }));
+        }
+
+        function clasificarPrecio(pkwh) { return pkwh < 0.083 ? 'bajo' : pkwh < 0.172 ? 'medio' : 'alto'; }
+
+        function renderPrecios(horas) {
+            const grid = document.getElementById('price-grid');
+            grid.innerHTML = '';
+            let min = Infinity, max = -Infinity, sum = 0, nBajo = 0;
+            horas.forEach(h => {
+                const p = h.precio_kwh || h.precio_mwh / 1000 || 0;
+                min = Math.min(min, p); max = Math.max(max, p); sum += p;
+                const cls = (h.clasificacion || '').toLowerCase() || clasificarPrecio(p);
+                if (cls === 'bajo') nBajo++;
+                const cell = document.createElement('div');
+                cell.className = `price-cell ${cls}`;
+                cell.title = `Hora ${h.hora}:00 — ${p.toFixed(4)} €/kWh`;
+                cell.innerHTML = `<div class="ph">${String(h.hora).padStart(2, '0')}h</div><div class="pv">${p.toFixed(3)}</div><div class="pc ${cls}">${cls.toUpperCase()}</div>`;
+                grid.appendChild(cell);
+            });
+            document.getElementById('s-min').textContent = min.toFixed(4);
+            document.getElementById('s-avg').textContent = (sum / horas.length).toFixed(4);
+            document.getElementById('s-max').textContent = max.toFixed(4);
+            document.getElementById('s-bajo').textContent = nBajo;
+        }
+
+        // ══════════════════════════════════════════
+        // PLAN — PRIORIDADES
+        // ══════════════════════════════════════════
+        function togglePrio(tipo) {
+            const map = { B: 'bajo', M: 'medio', A: 'alto' };
+            const btn = document.getElementById('prio-' + tipo);
+            if (prioridades.has(tipo)) {
+                if (prioridades.size <= 1) return; // al menos una
+                prioridades.delete(tipo);
+                btn.className = 'prio-btn';
+            } else {
+                prioridades.add(tipo);
+                btn.className = `prio-btn active-${map[tipo]}`;
+            }
+        }
+
+        // ══════════════════════════════════════════
+        // GENERAR PLAN
+        // ══════════════════════════════════════════
+        async function generarPlan() {
+            const socA = parseInt(document.getElementById('soc-actual').value) || 0;
+            const socO = parseInt(document.getElementById('soc-obj').value) || 80;
+            const cap = parseFloat(document.getElementById('bat-cap').value) || 52;
+            const pot = parseFloat(document.getElementById('pot-kw').value) || 7.4;
+            const fecha = document.getElementById('plan-fecha').value;
+            const tipo = document.getElementById('plan-tipo').value;
+            if (socA >= socO) { showToast('La batería actual debe ser menor que el objetivo', false); return; }
+
+            const btnId = 'btn-generar';
+            const origTxt = document.getElementById(btnId).innerHTML;
+            setLoading(btnId, true);
+
+            try {
+                const body = {
+                    usuario_id: currentUser.id,
+                    fecha, tipo,
+                    capacidad_total_kwh: cap,
+                    soc_actual: socA,
+                    soc_objetivo: socO,
+                    potencia_kw: pot,
+                    clasificaciones_permitidas: [...prioridades].map(x => ({ B: 'bajo', M: 'medio', A: 'alto' }[x]))
+                };
+                let data = null;
+                try {
+                    const r = await fetch(`${API}/plan_carga`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                    if (r.ok) data = await r.json();
+                } catch (_) { }
+                // Fallback demo
+                if (!data) data = generarPlanDemo(socA, socO, cap, pot, fecha, tipo);
+                currentPlan = data;
+                renderPlan(data);
+                showToast('Plan generado correctamente');
+            } catch (e) { showToast('Error al generar el plan', false); }
+            finally { document.getElementById(btnId).disabled = false; document.getElementById(btnId).innerHTML = origTxt; }
+        }
+
+        function generarPlanDemo(socA, socO, cap, pot, fecha, tipo) {
+            const precios = generarPreciosDemo();
+            const efic = 0.9;
+            const incSOC = (pot * efic / cap) * 100;
+            let soc = socA, coste = 0, hCarga = 0;
+            const permitidas = new Set([...prioridades]);
+
+            // Ordenar horas por precio si son bajas/medias primero
+            const orden = ['bajo', 'medio', 'alto'];
+            const sorted = [...precios].sort((a, b) => {
+                const ia = orden.indexOf((a.clasificacion || 'medio').toLowerCase());
+                const ib = orden.indexOf((b.clasificacion || 'medio').toLowerCase());
+                if (ia !== ib) return ia - ib;
+                return a.precio_kwh - b.precio_kwh;
+            });
+
+            const horasOn = new Set();
+            for (const h of sorted) {
+                if (soc >= socO) break;
+                const cls = (h.clasificacion || '').toLowerCase()[0].toUpperCase();
+                const allowed = { B: 'bajo', M: 'medio', A: 'alto' };
+                if ([...permitidas].some(p => allowed[p] === (h.clasificacion || '').toLowerCase())) {
+                    soc = Math.min(soc + incSOC, socO);
+                    coste += pot * h.precio_kwh;
+                    hCarga++;
+                    horasOn.add(h.hora);
+                }
+            }
+
+            const franjas = precios.map(h => ({
+                hora: h.hora, on_off: horasOn.has(h.hora),
+                potencia_kw: horasOn.has(h.hora) ? pot : 0,
+                precio_kwh: h.precio_kwh,
+                precio_mwh: h.precio_mwh,
+                clasificacion: (h.clasificacion || 'MEDIO'),
+                datetime: h.datetime,
+                coste_franja: horasOn.has(h.hora) ? +(pot * h.precio_kwh).toFixed(4) : 0
+            }));
+            return {
+                fecha, tipo,
+                resumen: {
+                    soc_actual: socA, soc_objetivo: socO, soc_final_estimado: +soc.toFixed(1),
+                    horas_carga: hCarga, energia_cargada_kwh: +(pot * hCarga * efic).toFixed(2),
+                    coste_estimado_eur: +coste.toFixed(4),
+                    emisiones_estimadas_gco2: +(pot * hCarga * 180).toFixed(1),
+                    viabilidad_economica: soc >= socO, necesita_horas_altas: false
+                },
+                franjas, aviso_horas_altas: '',
+                para_guardar: {
+                    usuario_id: currentUser.id, franjas: franjas.map(f => ({ hora: f.hora, on_off: f.on_off, potencia_kw: f.potencia_kw, precio_kwh: f.precio_kwh, clasificacion: (f.clasificacion || 'MEDIO').toLowerCase() })),
+                    coste_estimado_eur: +coste.toFixed(4), emisiones_estimadas_gco2: +(pot * hCarga * 180).toFixed(1), modelo_version: 'v1.0.0-demo'
+                }
+            };
+        }
+
+        function renderPlan(data) {
+            const res = data.resumen;
+            // Barras
+            const barsEl = document.getElementById('plan-bars');
+            const labelsEl = document.getElementById('plan-labels');
+            barsEl.innerHTML = ''; labelsEl.innerHTML = '';
+            const maxP = Math.max(...data.franjas.map(f => f.precio_kwh || f.precio_mwh / 1000 || 0));
+            data.franjas.forEach(f => {
+                const p = f.precio_kwh || (f.precio_mwh / 1000) || 0;
+                const h = Math.max(4, Math.round((p / maxP) * 76));
+                const cls = (f.clasificacion || 'MEDIO').toLowerCase();
+                const col = cls === 'bajo' ? 'var(--bajo)' : cls === 'medio' ? 'var(--medio)' : 'var(--alto)';
+                const bar = document.createElement('div');
+                bar.className = `plan-bar ${f.on_off ? 'on' : 'off'}`;
+                bar.style.cssText = `height:${h}px;background:${col}`;
+                bar.title = `${String(f.hora).padStart(2, '0')}h — ${p.toFixed(4)} €/kWh — ${f.on_off ? '⚡ CARGANDO' : '—'}`;
+                barsEl.appendChild(bar);
+                const lbl = document.createElement('div');
+                lbl.className = 'plan-label';
+                lbl.textContent = f.hora % 4 === 0 ? `${f.hora}h` : '';
+                labelsEl.appendChild(lbl);
+            });
+            // Summary
+            const sumEl = document.getElementById('plan-summary');
+            sumEl.innerHTML = `
+    <div class="ps-item"><div class="psv" style="color:var(--bajo)">€${(res.coste_estimado_eur || 0).toFixed(2)}</div><div class="psl">Coste estimado</div></div>
+    <div class="ps-item"><div class="psv" style="color:var(--accent)">${res.horas_carga || 0}h</div><div class="psl">Horas de carga</div></div>
+    <div class="ps-item"><div class="psv" style="color:var(--medio)">${(res.soc_final_estimado || 0).toFixed(0)}%</div><div class="psl">SOC final estimado</div></div>
+    <div class="ps-item"><div class="psv">${(res.energia_cargada_kwh || 0).toFixed(1)}</div><div class="psl">kWh cargados</div></div>
+    <div class="ps-item"><div class="psv" style="color:var(--muted)">${(res.emisiones_estimadas_gco2 || 0).toFixed(0)}</div><div class="psl">gCO₂ estimados</div></div>
+    <div class="ps-item"><div class="psv" style="color:${res.viabilidad_economica ? 'var(--bajo)' : 'var(--alto)'}">
+      ${res.viabilidad_economica ? '✅' : '⚠️'}</div><div class="psl">${res.viabilidad_economica ? 'Viable sin ALTO' : 'Requiere horas ALTO'}</div>
+    </div>`;
+            // Aviso horas altas
+            const avisoEl = document.getElementById('plan-aviso');
+            if (data.aviso_horas_altas && res.necesita_horas_altas) {
+                avisoEl.textContent = '⚠ ' + data.aviso_horas_altas;
+                avisoEl.style.display = 'block';
+            } else { avisoEl.style.display = 'none'; }
+            document.getElementById('plan-result').style.display = 'block';
+        }
+
+        // ══════════════════════════════════════════
+        // GUARDAR PLAN
+        // ══════════════════════════════════════════
+        async function guardarPlan() {
+            if (!currentPlan) { showToast('Genera un plan primero', false); return; }
+            try {
+                const body = currentPlan.para_guardar;
+                let ok = false;
+                try {
+                    const r = await fetch(`${API}/planes`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                    ok = r.ok;
+                } catch (_) { }
+                // Guardar en localStorage como demo
+                const planes = JSON.parse(localStorage.getItem('ev_planes') || '[]');
+                planes.unshift({
+                    id: 'plan_' + Date.now(), fecha: currentPlan.fecha, tipo: currentPlan.tipo, activo: false,
+                    coste_estimado_eur: currentPlan.resumen.coste_estimado_eur,
+                    horas_carga: currentPlan.resumen.horas_carga,
+                    soc_final: currentPlan.resumen.soc_final_estimado,
+                    modelo_version: body.modelo_version,
+                    fecha_generacion: new Date().toISOString(),
+                    franjas: body.franjas
+                });
+                localStorage.setItem('ev_planes', JSON.stringify(planes.slice(0, 20)));
+                showToast('Plan guardado correctamente');
+            } catch (e) { showToast('Error al guardar', false); }
+        }
+
+        // ══════════════════════════════════════════
+        // HISTORIAL
+        // ══════════════════════════════════════════
+        async function cargarHistorial() {
+            const listEl = document.getElementById('historial-list');
+            listEl.innerHTML = '<div class="stat-label" style="padding:20px">Cargando...</div>';
+            let planes = [];
+            try {
+                const r = await fetch(`${API}/planes/${currentUser.id}`);
+                if (r.ok) { const d = await r.json(); planes = d.planes || []; }
+            } catch (_) { }
+            // Merge con localStorage
+            const local = JSON.parse(localStorage.getItem('ev_planes') || '[]');
+            if (planes.length === 0) planes = local;
+            if (planes.length === 0) {
+                listEl.innerHTML = `<div class="empty-state"><div class="ei">📭</div><p>No tienes planes guardados aún.</p><p style="margin-top:8px;font-size:.85rem">Genera tu primer plan en la pestaña "Nuevo plan".</p></div>`;
+                return;
+            }
+            listEl.innerHTML = '<div class="history-list">' + planes.map(p => histItemHTML(p)).join('') + '</div>';
+        }
+
+        function histItemHTML(p) {
+            const fecha = new Date(p.fecha_generacion || p.fecha).toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+            return `<div class="hist-item" id="hitem-${p.id}">
+    <div class="hist-date">📅 ${fecha}</div>
+    <div class="hist-info">
+      <div class="hi-title">Plan ${p.tipo || 'actuales'} — ${p.fecha}</div>
+      <div class="hi-sub">💶 €${+(p.coste_estimado_eur || 0).toFixed(2)} estimado · ⚡ ${p.horas_carga || '—'}h · 🔋 ${(p.soc_final || 0).toFixed(0)}% SOC</div>
+    </div>
+    <span class="badge ${p.activo ? 'badge-bajo' : 'badge-medio'}">${p.activo ? 'Activo' : 'Pendiente'}</span>
+    <button class="btn-recalc" onclick="recalcular('${p.id}')">🔄 Recalcular</button>
+    ${p.activo
+                    ? `<button class="btn-desactivar" onclick="desactivarPlan('${p.id}')">⏸ Desactivar</button>`
+                    : `<button class="btn-desactivar" style="opacity:.3;cursor:not-allowed" disabled>⏸ Desactivar</button>`
+                }
+    <button class="btn-del" onclick="eliminarPlan('${p.id}')">🗑</button>
+  </div>`;
+        }
+
+        async function recalcular(planId) {
+            try {
+                let ok = false;
+                try {
+                    const r = await fetch(`${API}/planes/${planId}/activar`, { method: 'PUT' });
+                    ok = r.ok;
+                } catch (_) { }
+                // Demo: marcar como activo en localStorage
+                const planes = JSON.parse(localStorage.getItem('ev_planes') || '[]');
+                const idx = planes.findIndex(p => p.id === planId);
+                if (idx > -1) { planes[idx].activo = true; localStorage.setItem('ev_planes', JSON.stringify(planes)); }
+                showToast('Plan recalculado con precios reales');
+                cargarHistorial();
+            } catch (e) { showToast('Error al recalcular', false); }
+        }
+
+        async function desactivarPlan(planId) {
+            try {
+                try { await fetch(`${API}/planes/${planId}/desactivar`, { method: 'PUT' }); } catch (_) { }
+                // Demo: marcar como inactivo en localStorage
+                const planes = JSON.parse(localStorage.getItem('ev_planes') || '[]');
+                const idx = planes.findIndex(p => p.id === planId);
+                if (idx > -1) { planes[idx].activo = false; localStorage.setItem('ev_planes', JSON.stringify(planes)); }
+                showToast('Plan desactivado');
+                cargarHistorial();
+            } catch (e) { showToast('Error al desactivar', false); }
+        }
+
+        async function eliminarPlan(planId) {
+            try {
+                try { await fetch(`${API}/planes/${planId}`, { method: 'DELETE' }); } catch (_) { }
+                const planes = JSON.parse(localStorage.getItem('ev_planes') || '[]');
+                localStorage.setItem('ev_planes', JSON.stringify(planes.filter(p => p.id !== planId)));
+                showToast('Plan eliminado');
+                cargarHistorial();
+            } catch (e) { showToast('Error al eliminar', false); }
+        }
+
+        // ══════════════════════════════════════════
+        // INIT
+        // ══════════════════════════════════════════
+        window.onload = () => {
+            // Demo: auto-login si hay usuario guardado
+            const saved = localStorage.getItem('ev_user');
+            if (saved) { currentUser = JSON.parse(saved); launchApp(); }
+        };
+        // Guardar usuario al hacer login para persistencia demo
+        const _origLaunch = launchApp;
+        window.launchApp = function () {
+            if (currentUser) localStorage.setItem('ev_user', JSON.stringify(currentUser));
+            _origLaunch();
+        };
+    </script>
+</body>
+
+</html>

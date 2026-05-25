@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+pymongo
+python-dotenv
+scikit-learn
+numpy
+pandas
+pydantic
+pydantic[email]

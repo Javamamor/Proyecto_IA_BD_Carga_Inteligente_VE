@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+
+  # -- Frontend (nginx sirviendo el HTML) ----------------------
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ev_frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    networks:
+      - ev_net
+    restart: unless-stopped
+
+  # -- Backend (FastAPI + uvicorn) -----------------------------
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ev_backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env          # MONGO_URI, MONGO_DB, MODELO_PATH
+    volumes:
+      - ./backend/modelo:/opt/ev_cargador/modelo:ro   # modelo .pkl (solo lectura)
+      - ./backend/data:/opt/ev_cargador/data          # JSONs de respaldo
+    networks:
+      - ev_net
+    restart: unless-stopped
+
+  # -- Ingesta PVPC (cron diario 00:15) ------------------------
+  ingesta:
+    build:
+      context: ./backend/ingesta
+      dockerfile: Dockerfile
+    container_name: ev_ingesta
+    environment:
+      - MONGO_URI=mongodb+srv://admin:q8y9U5S5n4CRmwhM@clusterproyecto.h9bvdh1.mongodb.net/?appName=ClusterProyecto&retryWrites=true&w=majority
+      - MONGO_DB=ev_optimizer
+      - MODELO_WEBHOOK_URL=http://ev_backend:8000/nuevo_dato
+    networks:
+      - ev_net
+    restart: unless-stopped
+
+networks:
+  ev_net:
+    driver: bridge
