@@ -40,7 +40,7 @@ services:
       dockerfile: Dockerfile
     container_name: ev_ingesta
     environment:
-      - MONGO_URI=mongodb+srv://admin:q8y9U5S5n4CRmwhM@clusterproyecto.h9bvdh1.mongodb.net/?appName=ClusterProyecto&retryWrites=true&w=majority
+      - MONGO_URI=mongodb+srv://admin:<pass>@<cluster>.mongodb.net/?appName=<app_name>&retryWrites=true&w=majority
       - MONGO_DB=ev_optimizer
       - MODELO_WEBHOOK_URL=http://ev_backend:8000/nuevo_dato
     networks:
